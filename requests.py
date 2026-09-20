@@ -61,3 +61,27 @@ def can_approve(request: dict, role: str):
         return True
 
     return False
+
+def cancel_request(requests: list, name: str):
+
+    request = find_by_name(requests, name)
+
+    if request is None:
+        return False
+
+    request["status"] = "Отменена"
+    return True
+
+def show_requests(requests: list) -> None:
+    if not requests:
+        print("Заявок нет")
+        return
+
+    for request in requests:
+        print(
+            "ID:", request["id"],
+            "Название:", request["name"],
+            "Сумма:", request["amount"],
+            "Контрагент:", request["contractor"],
+            "Статус:", request["status"]
+        )
