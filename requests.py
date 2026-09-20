@@ -22,10 +22,10 @@ def find_request(requests: list, request_id: int):
 
 
 def find_by_name(requests: list, name: str):
-
     for request in requests:
-        if name.lower() in request[name]:
+        if name.lower() in request["name"].lower():
             return request
+
     return None
 
 
