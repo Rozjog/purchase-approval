@@ -1,7 +1,7 @@
 from requests import create_request, find_request
 
 
-requests = []
+requests: list[dict] = []
 
 create_request(
     requests,

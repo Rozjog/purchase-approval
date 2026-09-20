@@ -29,39 +29,6 @@ def find_by_name(requests: list, name: str):
     return None
 
 
-def approve_request(request: dict, budget: int, role: str):
-
-    if not can_approve(request, role):
-        request["status"] = "Нет прав на согласование"
-        return budget
-
-    if check_budget(request["amount"], budget):
-        request["status"] = "Согласована"
-        budget -= request["amount"]
-    else:
-        request["status"] = "Недостаточно бюджета"
-
-    return budget
-
-
-def check_budget(amount: int, budget: int):
-
-    if amount <= budget:
-        return True
-
-    return False
-
-
-def can_approve(request: dict, role: str):
-
-    if request["amount"] <= 250000 and role == "Руководитель отдела":
-        return True
-
-    if request["amount"] > 250000 and role == "Директор":
-        return True
-
-    return False
-
 def cancel_request(requests: list, name: str):
 
     request = find_by_name(requests, name)
@@ -72,7 +39,8 @@ def cancel_request(requests: list, name: str):
     request["status"] = "Отменена"
     return True
 
-def show_requests(requests: list) -> None:
+
+def show_requests(requests: list):
     if not requests:
         print("Заявок нет")
         return
