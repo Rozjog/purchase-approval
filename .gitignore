@@ -1,8 +1,14 @@
 venv/
 .env
+
 .vscode/
 .idea/
 *.iml
+
 __pycache__/
 *.pyc
+
+.mypy_cache/
+.pytest_cache/
+
 .DS_Store
