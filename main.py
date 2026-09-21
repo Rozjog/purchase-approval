@@ -16,7 +16,7 @@ def main() -> None:
     requests: list[dict] = load_requests(FILENAME)
 
     budget = 250000
-    role = "Руководитель"
+    role = "Директор"
 
     while True:
         print("\n=== Согласование закупок ===\n")
