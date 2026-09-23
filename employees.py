@@ -28,3 +28,4 @@ def show_employees(employees: list):
             "Имя:", employee["name"],
             "Роль:", employee["role"]
         )
+        

@@ -1,4 +1,10 @@
-def create_decision(decisions: list, approval_id: int, result: str, comment: str):
+def create_decision(
+        decisions: list, 
+        approval_id: int, 
+        result: str, 
+        comment: str
+        ):
+    
     decision = {
         "id": len(decisions) + 1,
         "approval_id": approval_id,

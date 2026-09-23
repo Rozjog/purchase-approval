@@ -1,39 +1,93 @@
-from approvals import create_approval, find_approval_by_id
+from models.employees import Employee
+from models.requests import Request
+from models.approvals import (
+    Approval,
+    create_approval,
+    find_approval_by_id
+)
 
 
 def test_create_approval() -> None:
-    approvals: list[dict] = []
+    approvals: list = []
 
-    create_approval(
-        approvals,
+    employee = Employee(
         1,
-        2
+        "Иван Иванов",
+        "Директор"
+    )
+
+    request = Request(
+        1,
+        "Покупка оборудования",
+        300000,
+        "ООО Техно",
+        employee
+    )
+
+    approval = create_approval(
+        approvals,
+        request,
+        employee
     )
 
     assert len(approvals) == 1
-    assert approvals[0]["request_id"] == 1
-    assert approvals[0]["employee_id"] == 2
-    assert approvals[0]["status"] == "Ожидает решения"
+    assert approval.id == 1
+    assert approval.request is request
+    assert approval.employee is employee
+    assert approval.status == "Ожидает решения"
+
+
+def test_can_approve() -> None:
+    employee = Employee(
+        1,
+        "Иван Иванов",
+        "Директор"
+    )
+
+    request = Request(
+        1,
+        "Покупка оборудования",
+        300000,
+        "ООО Техно",
+        employee
+    )
+
+    approval = Approval(
+        1,
+        request,
+        employee
+    )
+
+    assert approval.can_approve()
 
 
 def test_find_approval_by_id() -> None:
-    approvals: list[dict] = []
+    approvals: list = []
+
+    employee = Employee(
+        1,
+        "Иван Иванов",
+        "Директор"
+    )
+
+    request = Request(
+        1,
+        "Покупка оборудования",
+        300000,
+        "ООО Техно",
+        employee
+    )
 
     create_approval(
         approvals,
-        1,
-        2
+        request,
+        employee
     )
 
-    approval = find_approval_by_id(approvals, 1)
+    approval = find_approval_by_id(
+        approvals,
+        1
+    )
 
     assert approval is not None
-    assert approval["id"] == 1
-
-
-def test_approval_not_found() -> None:
-    approvals: list[dict] = []
-
-    approval = find_approval_by_id(approvals, 10)
-
-    assert approval is None
+    assert approval.id == 1

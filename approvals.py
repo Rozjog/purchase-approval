@@ -64,3 +64,4 @@ def show_approvals(approvals: list):
             "Сотрудник:", approval["employee_id"],
             "Статус:", approval["status"]
         )
+         
