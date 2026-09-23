@@ -108,7 +108,11 @@ def save_requests(filename: str, requests: list[Request]):
     save_json(filename, data)
 
 
-def load_approvals(filename: str, requests: list[Request], employees: list[Employee]):
+def load_approvals(
+    filename: str,
+    requests: list[Request],
+    employees: list[Employee]
+):
     data = load_json(filename)
     approvals = []
 

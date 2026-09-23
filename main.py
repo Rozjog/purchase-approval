@@ -1,29 +1,38 @@
-from requests import (
+from models.requests import (
     create_request,
     find_by_name,
     cancel_request,
     show_requests
 )
 
-from employees import (
+from models.employees import (
     create_employee,
     find_employee_by_id,
     show_employees
 )
 
-from approvals import (
+from models.approvals import (
     create_approval,
     find_approval_by_id,
-    show_approvals,
-    approve_request
+    show_approvals
 )
 
-from decisions import (
+from models.decisions import (
     create_decision,
     show_decisions
 )
 
-from storage import load_data, save_data
+from storage import (
+    load_employees,
+    load_requests,
+    load_approvals,
+    load_decisions,
+    save_employees,
+    save_requests,
+    save_approvals,
+    save_decisions
+)
+
 from utils import input_int
 
 
@@ -34,10 +43,25 @@ DECISIONS_FILE = "data/decisions.json"
 
 
 def main() -> None:
-    requests: list[dict] = load_data(REQUESTS_FILE)
-    employees: list[dict] = load_data(EMPLOYEES_FILE)
-    approvals: list[dict] = load_data(APPROVALS_FILE)
-    decisions: list[dict] = load_data(DECISIONS_FILE)
+    employees = load_employees(
+        EMPLOYEES_FILE
+    )
+
+    requests = load_requests(
+        REQUESTS_FILE,
+        employees
+    )
+
+    approvals = load_approvals(
+        APPROVALS_FILE,
+        requests,
+        employees
+    )
+
+    decisions = load_decisions(
+        DECISIONS_FILE,
+        approvals
+    )
 
     budget = 250000
 
@@ -55,16 +79,29 @@ def main() -> None:
         print("10. Показать решения")
         print("0. Выход")
 
-        choice = input_int("Выберите действие: ")
+        choice = input_int(
+            "Выберите действие: "
+        )
 
         if choice == 1:
             show_requests(requests)
 
         elif choice == 2:
-            name = input("Название заявки: ")
-            amount = input_int("Сумма: ")
-            contractor = input("Контрагент: ")
-            employee_id = input_int("ID сотрудника: ")
+            name = input(
+                "Название заявки: "
+            )
+
+            amount = input_int(
+                "Сумма: "
+            )
+
+            contractor = input(
+                "Контрагент: "
+            )
+
+            employee_id = input_int(
+                "ID сотрудника: "
+            )
 
             employee = find_employee_by_id(
                 employees,
@@ -80,10 +117,10 @@ def main() -> None:
                 name,
                 amount,
                 contractor,
-                employee_id
+                employee
             )
 
-            save_data(
+            save_requests(
                 REQUESTS_FILE,
                 requests
             )
@@ -91,7 +128,9 @@ def main() -> None:
             print("Заявка создана")
 
         elif choice == 3:
-            name = input("Введите название заявки: ")
+            name = input(
+                "Введите название заявки: "
+            )
 
             request = find_by_name(
                 requests,
@@ -104,10 +143,15 @@ def main() -> None:
                 print(request)
 
         elif choice == 4:
-            name = input("Введите название заявки: ")
+            name = input(
+                "Введите название заявки: "
+            )
 
-            if cancel_request(requests, name):
-                save_data(
+            if cancel_request(
+                requests,
+                name
+            ):
+                save_requests(
                     REQUESTS_FILE,
                     requests
                 )
@@ -120,8 +164,13 @@ def main() -> None:
             show_employees(employees)
 
         elif choice == 6:
-            name = input("Имя сотрудника: ")
-            role = input("Роль сотрудника: ")
+            name = input(
+                "Имя сотрудника: "
+            )
+
+            role = input(
+                "Роль сотрудника: "
+            )
 
             create_employee(
                 employees,
@@ -129,7 +178,7 @@ def main() -> None:
                 role
             )
 
-            save_data(
+            save_employees(
                 EMPLOYEES_FILE,
                 employees
             )
@@ -137,13 +186,13 @@ def main() -> None:
             print("Сотрудник добавлен")
 
         elif choice == 7:
-            request_name = input(
+            name = input(
                 "Введите название заявки: "
             )
 
             request = find_by_name(
                 requests,
-                request_name
+                name
             )
 
             if request is None:
@@ -165,11 +214,11 @@ def main() -> None:
 
             create_approval(
                 approvals,
-                request["id"],
-                employee_id
+                request,
+                employee
             )
 
-            save_data(
+            save_approvals(
                 APPROVALS_FILE,
                 approvals
             )
@@ -193,90 +242,80 @@ def main() -> None:
                 print("Согласование не найдено")
                 continue
 
-            employee = find_employee_by_id(
-                employees,
-                approval["employee_id"]
+            print("1. Согласовать")
+            print("2. Отклонить")
+
+            decision_choice = input_int(
+                "Выберите решение: "
             )
 
-            if employee is None:
-                print("Сотрудник не найден")
+            if decision_choice == 1:
+                if not approval.can_approve():
+                    result = "Нет прав на согласование"
+
+                elif approval.request.amount > budget:
+                    result = "Недостаточно бюджета"
+
+                else:
+                    result = "Согласована"
+                    budget -= approval.request.amount
+
+            elif decision_choice == 2:
+                result = "Отклонена"
+
+            else:
+                print("Такого решения нет")
                 continue
-
-            request = None
-
-            for item in requests:
-                if item["id"] == approval["request_id"]:
-                    request = item
-                    break
-
-            if request is None:
-                print("Заявка не найдена")
-                continue
-
-            budget = approve_request(
-                request,
-                budget,
-                employee["role"]
-            )
-
-            approval["status"] = request["status"]
 
             comment = input(
-                "Комментарий к решению: "
+                "Комментарий: "
             )
 
             create_decision(
                 decisions,
-                approval["id"],
-                request["status"],
+                approval,
+                result,
                 comment
             )
 
-            save_data(
+            save_requests(
                 REQUESTS_FILE,
                 requests
             )
 
-            save_data(
+            save_approvals(
                 APPROVALS_FILE,
                 approvals
             )
 
-            save_data(
+            save_decisions(
                 DECISIONS_FILE,
                 decisions
             )
 
-            print(
-                "Решение:",
-                request["status"]
-            )
-
-            print(
-                "Остаток бюджета:",
-                budget
-            )
+            print("Результат:", result)
+            print("Остаток бюджета:", budget)
 
         elif choice == 10:
             show_decisions(decisions)
 
         elif choice == 0:
-            save_data(
-                REQUESTS_FILE,
-                requests
-            )
-
-            save_data(
+            save_employees(
                 EMPLOYEES_FILE,
                 employees
             )
 
-            save_data(
+            save_requests(
+                REQUESTS_FILE,
+                requests
+            )
+
+            save_approvals(
                 APPROVALS_FILE,
                 approvals
             )
 
-            save_data(
+            save_decisions(
                 DECISIONS_FILE,
                 decisions
             )

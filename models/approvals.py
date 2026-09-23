@@ -9,7 +9,6 @@ class Approval:
         request: Request,
         employee: Employee
     ):
-        
         self.id = approval_id
         self.request = request
         self.employee = employee
@@ -44,7 +43,6 @@ def create_approval(
     request: Request,
     employee: Employee
 ):
-    
     approval = Approval(
         len(approvals) + 1,
         request,
@@ -55,8 +53,7 @@ def create_approval(
     return approval
 
 
-def find_approval_by_id(approvals: list[Approval],approval_id: int):
-    
+def find_approval_by_id(approvals: list[Approval], approval_id: int):
     for approval in approvals:
         if approval.id == approval_id:
             return approval
@@ -65,7 +62,6 @@ def find_approval_by_id(approvals: list[Approval],approval_id: int):
 
 
 def show_approvals(approvals: list[Approval]):
-    
     if not approvals:
         print("Согласований нет")
         return

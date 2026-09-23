@@ -10,7 +10,6 @@ class Request:
         contractor: str,
         employee: Employee
     ):
-        
         self.id = request_id
         self.name = name
         self.amount = amount

@@ -9,7 +9,6 @@ class Decision:
         result: str,
         comment: str
     ):
-        
         self.id = decision_id
         self.approval = approval
         self.result = result
@@ -34,7 +33,6 @@ def create_decision(
     result: str,
     comment: str
 ):
-    
     decision = Decision(
         len(decisions) + 1,
         approval,
@@ -57,7 +55,6 @@ def find_decision_by_id(decisions: list[Decision], decision_id: int):
 
 
 def show_decisions(decisions: list[Decision]):
-    
     if not decisions:
         print("Решений нет")
         return
