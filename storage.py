@@ -1,7 +1,7 @@
 import json
 
 
-def load_requests(filename: str):
+def load_data(filename: str):
     try:
         with open(filename, "r", encoding="utf-8") as file:
             return json.load(file)
@@ -13,11 +13,6 @@ def load_requests(filename: str):
         return []
 
 
-def save_requests(filename: str, requests: list):
+def save_data(filename: str, requests: list):
     with open(filename, "w", encoding="utf-8") as file:
-        json.dump(
-            requests,
-            file,
-            ensure_ascii=False,
-            indent=4
-        )
+        json.dump(requests, file, ensure_ascii=False, indent=4)

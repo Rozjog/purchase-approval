@@ -1,15 +1,20 @@
-def create_request(requests: list, name: str, amount: int, contractor: str):
-
+def create_request(
+    requests: list,
+    name: str,
+    amount: int,
+    contractor: str,
+    employee_id: int
+):
     request = {
         "id": len(requests) + 1,
         "name": name,
         "amount": amount,
         "contractor": contractor,
+        "employee_id": employee_id,
         "status": "Создана"
     }
 
     requests.append(request)
-
     return request
 
 

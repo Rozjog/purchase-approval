@@ -20,6 +20,7 @@
 
 ## Структура проекта
 
+```text
 purchase-approval/
 ├── main.py
 ├── requests.py
@@ -34,7 +35,7 @@ purchase-approval/
 │   └── requests.json
 └── tests/
     └── test_request.py
-
+```
 
 ### Назначение файлов
 
