@@ -8,17 +8,17 @@ class Decision:
         approval: Approval,
         result: str,
         comment: str
-    ):
+    ) -> None:
         self.id = decision_id
         self.approval = approval
         self.result = result
         self.comment = comment
 
-    def apply(self):
+    def apply(self) -> None:
         self.approval.status = self.result
         self.approval.request.status = self.result
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"ID: {self.id}, "
             f"Согласование: {self.approval.id}, "
@@ -32,7 +32,7 @@ def create_decision(
     approval: Approval,
     result: str,
     comment: str
-):
+) -> Decision:
     decision = Decision(
         len(decisions) + 1,
         approval,
@@ -46,7 +46,10 @@ def create_decision(
     return decision
 
 
-def find_decision_by_id(decisions: list[Decision], decision_id: int):
+def find_decision_by_id(
+    decisions: list[Decision],
+    decision_id: int
+) -> Decision | None:
     for decision in decisions:
         if decision.id == decision_id:
             return decision
@@ -54,7 +57,9 @@ def find_decision_by_id(decisions: list[Decision], decision_id: int):
     return None
 
 
-def show_decisions(decisions: list[Decision]):
+def show_decisions(
+    decisions: list[Decision]
+) -> None:
     if not decisions:
         print("Решений нет")
         return
