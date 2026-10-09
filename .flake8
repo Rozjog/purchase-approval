@@ -1,6 +1,12 @@
 [flake8]
 exclude =
     venv,
+    .venv,
     __pycache__,
     .mypy_cache,
-    .pytest_cache
+    .pytest_cache,
+    db.sqlite3,
+    purchase_approval/settings.py,
+    purchase_approval/asgi.py,
+    purchase_approval/wsgi.py,
+    manage.py

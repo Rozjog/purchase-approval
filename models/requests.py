@@ -62,6 +62,17 @@ def find_by_name(
     return None
 
 
+def find_request_by_id(
+    requests: list[Request],
+    request_id: int
+) -> Request | None:
+    for request in requests:
+        if request.id == request_id:
+            return request
+
+    return None
+
+
 def cancel_request(
     requests: list[Request],
     name: str

@@ -1,11 +1,35 @@
 from django.http import HttpResponse
+
 from homepage.views import page
+from models.employees import find_employee_by_id
+from storage import load_employees
+
+
+EMPLOYEES_FILE = "data/employees.json"
 
 
 def employees(request):
-    content = """
+    employees_list = load_employees(
+        EMPLOYEES_FILE
+    )
+
+    items = ""
+
+    for employee in employees_list:
+        items += f"""
+        <li class="list-group-item">
+            <a href="/employees/{employee.id}/">
+                {employee.name} – {employee.role}
+            </a>
+        </li>
+        """
+
+    content = f"""
     <h1>Сотрудники</h1>
-    <p>Список сотрудников системы.</p>
+
+    <ul class="list-group">
+        {items}
+    </ul>
     """
 
     return HttpResponse(
@@ -17,18 +41,66 @@ def employees(request):
 
 
 def employee_detail(request, employee_id):
-    content = f"""
-    <h1>Сотрудник {employee_id}</h1>
+    employees_list = load_employees(
+        EMPLOYEES_FILE
+    )
 
-    <a href="/employees/"
-       class="btn btn-outline-secondary">
-        Назад к сотрудникам
-    </a>
+    employee = find_employee_by_id(
+        employees_list,
+        employee_id
+    )
+
+    if employee is None:
+        content = """
+        <h1 class="text-danger">
+            Сотрудник не найден
+        </h1>
+
+        <a href="/employees/"
+           class="btn btn-outline-secondary">
+            Назад к сотрудникам
+        </a>
+        """
+
+        return HttpResponse(
+            page(
+                "Сотрудник не найден",
+                content
+            ),
+            status=404
+        )
+
+    content = f"""
+    <div class="card">
+        <div class="card-body">
+
+            <h5 class="card-title">
+                {employee.name}
+            </h5>
+
+            <p>
+                <strong>ID:</strong>
+                {employee.id}
+            </p>
+
+            <p>
+                <strong>Роль:</strong>
+                {employee.role}
+            </p>
+
+            <a href="/employees/"
+               class="btn btn-outline-secondary">
+                Назад к сотрудникам
+            </a>
+
+        </div>
+    </div>
     """
 
     return HttpResponse(
         page(
-            f"Сотрудник {employee_id}",
+            employee.name,
             content
-        )
+        ),
+        status=200
     )
