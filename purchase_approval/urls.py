@@ -10,3 +10,5 @@ urlpatterns = [
     path("approvals/", include("approvals.urls")),
     path("decisions/", include("decisions.urls")),
 ]
+
+handler404 = "homepage.views.page_not_found"

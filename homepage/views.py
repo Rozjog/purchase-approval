@@ -66,8 +66,18 @@ def index(request):
     """
 
     return HttpResponse(
-        page(
-            "Purchase Approval",
-            content
-        )
+        page("Purchase Approval2", content)
+    )
+
+
+def page_not_found(request, exception):
+    content = """
+    <h1 class="text-danger">404 – страница не найдена</h1>
+    <p>Проверьте адрес или вернитесь на главную.</p>
+    <a href="/" class="btn btn-primary">На главную</a>
+    """
+
+    return HttpResponse(
+        page("404 – страница не найдена", content),
+        status=404
     )
