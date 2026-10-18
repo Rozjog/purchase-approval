@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}
+Согласования — Purchase Approval
+{% endblock %}
+
+{% block content %}
+    <h1>Согласования заявок</h1>
+
+    {% for approval in approvals %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h2 class="card-title">
+                    Согласование №{{ approval.id }}
+                </h2>
+
+                <p>
+                    <strong>Заявка:</strong>
+                    {{ approval.request.name }}
+                </p>
+
+                <p>
+                    <strong>Ответственный:</strong>
+                    {{ approval.employee.name }}
+                </p>
+
+                <p>
+                    <strong>Статус:</strong>
+                    {% include "approvals/includes/approval_status.html" %}
+                </p>
+
+                <a
+                    href="/approvals/{{ approval.id }}/"
+                    class="btn btn-primary"
+                >
+                    Подробнее
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <p>Согласований пока нет.</p>
+    {% endfor %}
+{% endblock %}

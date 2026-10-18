@@ -1,6 +1,4 @@
-from django.http import HttpResponse
-
-from homepage.views import page
+from django.shortcuts import render
 from models.requests import find_request_by_id
 from storage import (
     load_employees,
@@ -13,55 +11,30 @@ REQUESTS_FILE = "data/requests.json"
 
 
 def requests(request):
-    employees_list = load_employees(
-        EMPLOYEES_FILE
-    )
+    employees_list = load_employees("data/employees.json")
 
     requests_list = load_requests(
-        REQUESTS_FILE,
+        "data/requests.json",
         employees_list
     )
 
-    items = ""
+    context = {
+        "requests": requests_list,
+    }
 
-    for item in requests_list:
-        text = (
-            f"{item.name} – "
-            f"{item.amount} руб. – "
-            f"{item.status}"
-        )
-
-        items += f"""
-        <li class="list-group-item">
-            <a href="/requests/{item.id}/">
-                {text}
-            </a>
-        </li>
-        """
-
-    content = f"""
-    <h1>Заявки</h1>
-
-    <ul class="list-group">
-        {items}
-    </ul>
-    """
-
-    return HttpResponse(
-        page(
-            "Purchase Approval – заявки",
-            content
-        )
+    return render(
+        request,
+        "purchase_requests/request_list.html",
+        context,
     )
+
 
 
 def request_detail(request, request_id):
-    employees_list = load_employees(
-        EMPLOYEES_FILE
-    )
+    employees_list = load_employees("data/employees.json")
 
     requests_list = load_requests(
-        REQUESTS_FILE,
+        "data/requests.json",
         employees_list
     )
 
@@ -70,72 +43,14 @@ def request_detail(request, request_id):
         request_id
     )
 
-    if purchase_request is None:
-        content = """
-        <h1 class="text-danger">
-            Заявка не найдена
-        </h1>
+    context = {
+        "purchase_request": purchase_request,
+    }
 
-        <a href="/requests/"
-           class="btn btn-outline-secondary">
-            Назад к заявкам
-        </a>
-        """
-
-        return HttpResponse(
-            page(
-                "Заявка не найдена",
-                content
-            ),
-            status=404
-        )
-
-    content = f"""
-    <div class="card">
-        <div class="card-body">
-
-            <h5 class="card-title">
-                {purchase_request.name}
-            </h5>
-
-            <p>
-                <strong>ID:</strong>
-                {purchase_request.id}
-            </p>
-
-            <p>
-                <strong>Сумма:</strong>
-                {purchase_request.amount} руб.
-            </p>
-
-            <p>
-                <strong>Контрагент:</strong>
-                {purchase_request.contractor}
-            </p>
-
-            <p>
-                <strong>Сотрудник:</strong>
-                {purchase_request.employee.name}
-            </p>
-
-            <p>
-                <strong>Статус:</strong>
-                {purchase_request.status}
-            </p>
-
-            <a href="/requests/"
-               class="btn btn-outline-secondary">
-                Назад к заявкам
-            </a>
-
-        </div>
-    </div>
-    """
-
-    return HttpResponse(
-        page(
-            purchase_request.name,
-            content
-        ),
-        status=200
+    return render(
+        request,
+        "purchase_requests/request_detail.html",
+        context,
+        status=404 if purchase_request is None else 200,
     )
+

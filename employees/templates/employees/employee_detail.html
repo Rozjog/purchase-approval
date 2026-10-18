@@ -1,0 +1,47 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+    {% if employee %}
+        {{ employee.name }} — Purchase Approval
+    {% else %}
+        Сотрудник не найден — Purchase Approval
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if employee %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">
+                    {{ employee.name }}
+                </h1>
+
+                <p class="card-text">
+                    <strong>ID:</strong>
+                    {{ employee.id }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Роль:</strong>
+                    {{ employee.role }}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">
+            Сотрудник не найден
+        </h1>
+
+        <p>
+            Сотрудник с указанным идентификатором отсутствует.
+        </p>
+    {% endif %}
+
+    <a
+        href="/employees/"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← К списку сотрудников
+    </a>
+{% endblock %}

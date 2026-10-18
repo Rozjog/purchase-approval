@@ -1,0 +1,13 @@
+{% if approval.status == "Одобрена" %}
+    <span class="badge bg-success">
+        {{ approval.status }}
+    </span>
+{% elif approval.status == "Отклонена" %}
+    <span class="badge bg-danger">
+        {{ approval.status }}
+    </span>
+{% else %}
+    <span class="badge bg-secondary">
+        {{ approval.status }}
+    </span>
+{% endif %}

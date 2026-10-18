@@ -1,0 +1,16 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+Заявки — Purchase Approval
+{% endblock %}
+
+{% block content %}
+    <h1>Заявки на закупку</h1>
+
+    {% for purchase_request in requests %}
+        {% include "purchase_requests/includes/request_card.html" %}
+    {% empty %}
+        <p>Заявок пока нет.</p>
+    {% endfor %}
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-
+from django.shortcuts import render
 
 def page(title, content):
     bootstrap = (
@@ -35,39 +35,7 @@ def page(title, content):
 
 
 def index(request):
-    content = """
-    <h1 class="display-4">Purchase Approval</h1>
-
-    <p class="lead">
-        Система согласования закупок.
-    </p>
-
-    <p>Основные разделы:</p>
-
-    <a href="/employees/"
-       class="btn btn-primary me-2">
-        Сотрудники
-    </a>
-
-    <a href="/requests/"
-       class="btn btn-secondary me-2">
-        Заявки
-    </a>
-
-    <a href="/approvals/"
-       class="btn btn-secondary me-2">
-        Согласования
-    </a>
-
-    <a href="/decisions/"
-       class="btn btn-secondary">
-        Решения
-    </a>
-    """
-
-    return HttpResponse(
-        page("Purchase Approval2", content)
-    )
+    return render(request, "homepage/index.html")
 
 
 def page_not_found(request, exception):

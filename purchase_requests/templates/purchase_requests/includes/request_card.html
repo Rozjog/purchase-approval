@@ -1,0 +1,35 @@
+
+<article class="card mb-3">
+    <div class="card-body">
+        <h2 class="card-title">
+            {{ purchase_request.name }}
+        </h2>
+
+        <p class="card-text">
+            <strong>Сумма:</strong>
+            {{ purchase_request.amount }} руб.
+        </p>
+
+        <p class="card-text">
+            <strong>Контрагент:</strong>
+            {{ purchase_request.contractor }}
+        </p>
+
+        <p class="card-text">
+            <strong>Сотрудник:</strong>
+            {{ purchase_request.employee.name }}
+        </p>
+
+        <p class="card-text">
+            <strong>Статус:</strong>
+            {{ purchase_request.status }}
+        </p>
+
+        <a
+            href="/requests/{{ purchase_request.id }}/"
+            class="btn btn-primary"
+        >
+            Подробнее
+        </a>
+    </div>
+</article>

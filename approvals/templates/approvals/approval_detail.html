@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if approval %}
+        Согласование №{{ approval.id }} — Purchase Approval
+    {% else %}
+        Согласование не найдено — Purchase Approval
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if approval %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">
+                    Согласование №{{ approval.id }}
+                </h1>
+
+                <p class="card-text">
+                    <strong>ID:</strong>
+                    {{ approval.id }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Заявка:</strong>
+                    {{ approval.request.name }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Сумма заявки:</strong>
+                    {{ approval.request.amount }} руб.
+                </p>
+
+                <p class="card-text">
+                    <strong>Ответственный:</strong>
+                    {{ approval.employee.name }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Статус:</strong>
+                    {% include "approvals/includes/approval_status.html" %}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">
+            Согласование не найдено
+        </h1>
+
+        <p>
+            Согласование с указанным идентификатором отсутствует.
+        </p>
+    {% endif %}
+
+    <a
+        href="/approvals/"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← К списку согласований
+    </a>
+{% endblock %}
