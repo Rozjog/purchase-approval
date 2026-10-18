@@ -1,0 +1,32 @@
+
+body {
+    min-height: 100vh;
+    background-color: #f8fafc;
+    color: #253047;
+}
+
+.nav {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.nav-link {
+    font-weight: 500;
+}
+
+.request-card {
+    border: 1px solid #dbe2eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.approval-status {
+    font-weight: 600;
+    padding: 0.45rem 0.7rem;
+}
+
+.purchase-logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 10px;
+}
