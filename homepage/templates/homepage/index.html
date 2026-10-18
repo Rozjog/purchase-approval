@@ -16,21 +16,35 @@
         заявки на закупки, согласования и принятые решения.
     </p>
 
+    
     <h2>Основные разделы</h2>
 
-    <a href="/employees/" class="btn btn-primary me-2">
+    <a
+        href="{% url 'employees:employees' %}"
+        class="btn btn-primary me-2"
+    >
         Сотрудники
     </a>
 
-    <a href="/requests/" class="btn btn-primary me-2">
+    <a
+        href="{% url 'purchase_requests:requests' %}"
+        class="btn btn-primary me-2"
+    >
         Заявки
     </a>
 
-    <a href="/approvals/" class="btn btn-secondary me-2">
+    <a
+        href="{% url 'approvals:approvals' %}"
+        class="btn btn-secondary me-2"
+    >
         Согласования
     </a>
 
-    <a href="/decisions/" class="btn btn-secondary">
+    <a
+        href="{% url 'decisions:decisions' %}"
+        class="btn btn-secondary"
+    >
         Решения
     </a>
+
 {% endblock %}

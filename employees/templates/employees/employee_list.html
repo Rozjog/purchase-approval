@@ -25,7 +25,7 @@
                 </p>
 
                 <a
-                    href="/employees/{{ employee.id }}/"
+                    href="{% url 'employees:employee_detail' employee.id %}"
                     class="btn btn-primary"
                 >
                     Подробнее

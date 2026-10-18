@@ -35,7 +35,7 @@
                 </p>
 
                 <a
-                    href="/decisions/{{ decision.id }}/"
+                    href="{% url 'decisions:decision_detail' decision.id %}"
                     class="btn btn-primary"
                 >
                     Подробнее

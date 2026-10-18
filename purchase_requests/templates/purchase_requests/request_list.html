@@ -8,6 +8,8 @@
 {% block content %}
     <h1>Заявки на закупку</h1>
 
+    <p>Всего заявок: {{ requests|length }}</p>
+
     {% for purchase_request in requests %}
         {% include "purchase_requests/includes/request_card.html" %}
     {% empty %}

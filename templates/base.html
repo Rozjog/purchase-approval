@@ -13,13 +13,7 @@
     >
 </head>
 <body>
-    <nav class="nav p-3">
-        <a class="nav-link" href="/">Главная</a>
-        <a class="nav-link" href="/employees/">Сотрудники</a>
-        <a class="nav-link" href="/requests/">Заявки</a>
-        <a class="nav-link" href="/approvals/">Согласования</a>
-        <a class="nav-link" href="/decisions/">Решения</a>
-    </nav>
+    {% include "includes/navigation.html" %}
 
     <main class="container mt-4">
         {% block content %}

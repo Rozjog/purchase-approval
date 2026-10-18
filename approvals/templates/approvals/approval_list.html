@@ -30,7 +30,7 @@
                 </p>
 
                 <a
-                    href="/approvals/{{ approval.id }}/"
+                    href="{% url 'approvals:approval_detail' approval.id %}"
                     class="btn btn-primary"
                 >
                     Подробнее
