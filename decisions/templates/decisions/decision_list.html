@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}
+Решения — Purchase Approval
+{% endblock %}
+
+{% block content %}
+    <h1>Решения по согласованиям</h1>
+
+    {% for decision in decisions %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h2 class="card-title">
+                    Решение №{{ decision.id }}
+                </h2>
+
+                <p class="card-text">
+                    <strong>Согласование:</strong>
+                    №{{ decision.approval.id }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Заявка:</strong>
+                    {{ decision.approval.request.name }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Результат:</strong>
+                    {{ decision.result }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Комментарий:</strong>
+                    {{ decision.comment }}
+                </p>
+
+                <a
+                    href="/decisions/{{ decision.id }}/"
+                    class="btn btn-primary"
+                >
+                    Подробнее
+                </a>
+            </div>
+        </div>
+    {% empty %}
+        <p>Решений пока нет.</p>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if decision %}
+        Решение №{{ decision.id }} — Purchase Approval
+    {% else %}
+        Решение не найдено — Purchase Approval
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if decision %}
+        <div class="card">
+            <div class="card-body">
+                <h1 class="card-title">
+                    Решение №{{ decision.id }}
+                </h1>
+
+                <p class="card-text">
+                    <strong>ID:</strong>
+                    {{ decision.id }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Согласование:</strong>
+                    №{{ decision.approval.id }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Заявка:</strong>
+                    {{ decision.approval.request.name }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Сумма заявки:</strong>
+                    {{ decision.approval.request.amount }} руб.
+                </p>
+
+                <p class="card-text">
+                    <strong>Результат:</strong>
+                    {{ decision.result }}
+                </p>
+
+                <p class="card-text">
+                    <strong>Комментарий:</strong>
+                    {{ decision.comment }}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-danger">
+            Решение не найдено
+        </h1>
+
+        <p>
+            Решение с указанным идентификатором отсутствует.
+        </p>
+    {% endif %}
+
+    <a
+        href="/decisions/"
+        class="btn btn-outline-secondary mt-3"
+    >
+        ← К списку решений
+    </a>
+{% endblock %}

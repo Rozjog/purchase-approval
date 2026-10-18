@@ -1,6 +1,4 @@
-from django.http import HttpResponse
-
-from homepage.views import page
+from django.shortcuts import render
 from models.decisions import find_decision_by_id
 from storage import (
     load_approvals,
@@ -16,74 +14,58 @@ APPROVALS_FILE = "data/approvals.json"
 DECISIONS_FILE = "data/decisions.json"
 
 
+
 def decisions(request):
     employees_list = load_employees(
-        EMPLOYEES_FILE
+        "data/employees.json"
     )
 
     requests_list = load_requests(
-        REQUESTS_FILE,
+        "data/requests.json",
         employees_list
     )
 
     approvals_list = load_approvals(
-        APPROVALS_FILE,
+        "data/approvals.json",
         requests_list,
         employees_list
     )
 
     decisions_list = load_decisions(
-        DECISIONS_FILE,
+        "data/decisions.json",
         approvals_list
     )
 
-    items = ""
+    context = {
+        "decisions": decisions_list,
+    }
 
-    for decision in decisions_list:
-        items += f"""
-        <li class="list-group-item">
-            <a href="/decisions/{decision.id}/">
-                Решение №{decision.id}
-                –
-                {decision.result}
-            </a>
-        </li>
-        """
-
-    content = f"""
-    <h1>Решения</h1>
-
-    <ul class="list-group">
-        {items}
-    </ul>
-    """
-
-    return HttpResponse(
-        page(
-            "Purchase Approval – решения",
-            content
-        )
+    return render(
+        request,
+        "decisions/decision_list.html",
+        context,
     )
+
 
 
 def decision_detail(request, decision_id):
     employees_list = load_employees(
-        EMPLOYEES_FILE
+        "data/employees.json"
     )
 
     requests_list = load_requests(
-        REQUESTS_FILE,
+        "data/requests.json",
         employees_list
     )
 
     approvals_list = load_approvals(
-        APPROVALS_FILE,
+        "data/approvals.json",
         requests_list,
         employees_list
     )
 
     decisions_list = load_decisions(
-        DECISIONS_FILE,
+        "data/decisions.json",
         approvals_list
     )
 
@@ -92,67 +74,13 @@ def decision_detail(request, decision_id):
         decision_id
     )
 
-    if decision is None:
-        content = """
-        <h1 class="text-danger">
-            Решение не найдено
-        </h1>
+    context = {
+        "decision": decision,
+    }
 
-        <a href="/decisions/"
-           class="btn btn-outline-secondary">
-            Назад к решениям
-        </a>
-        """
-
-        return HttpResponse(
-            page(
-                "Решение не найдено",
-                content
-            ),
-            status=404
-        )
-
-    content = f"""
-    <div class="card">
-        <div class="card-body">
-
-            <h5 class="card-title">
-                Решение №{decision.id}
-            </h5>
-
-            <p>
-                <strong>Согласование:</strong>
-                №{decision.approval.id}
-            </p>
-
-            <p>
-                <strong>Заявка:</strong>
-                {decision.approval.request.name}
-            </p>
-
-            <p>
-                <strong>Результат:</strong>
-                {decision.result}
-            </p>
-
-            <p>
-                <strong>Комментарий:</strong>
-                {decision.comment}
-            </p>
-
-            <a href="/decisions/"
-               class="btn btn-outline-secondary">
-                Назад к решениям
-            </a>
-
-        </div>
-    </div>
-    """
-
-    return HttpResponse(
-        page(
-            f"Решение №{decision.id}",
-            content
-        ),
-        status=200
+    return render(
+        request,
+        "decisions/decision_detail.html",
+        context,
+        status=404 if decision is None else 200,
     )

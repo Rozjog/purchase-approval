@@ -1,6 +1,4 @@
-from django.http import HttpResponse
 from django.shortcuts import render
-from homepage.views import page
 from models.employees import find_employee_by_id
 from storage import load_employees
 
