@@ -1,22 +1,26 @@
 from django.shortcuts import render
-from models.requests import find_request_by_id
-from storage import (
-    load_employees,
-    load_requests
-)
-
-
-EMPLOYEES_FILE = "data/employees.json"
-REQUESTS_FILE = "data/requests.json"
+from db.database import get_connection
 
 
 def requests(request):
-    employees_list = load_employees("data/employees.json")
+    conn = get_connection()
 
-    requests_list = load_requests(
-        "data/requests.json",
-        employees_list
-    )
+    try:
+        requests_list = conn.execute("""
+            SELECT
+                requests.id,
+                requests.name,
+                requests.amount,
+                requests.contractor,
+                requests.status,
+                employees.name AS employee_name
+            FROM requests
+            JOIN employees
+                ON requests.employee_id = employees.id
+            ORDER BY requests.id
+        """).fetchall()
+    finally:
+        conn.close()
 
     context = {
         "requests": requests_list,
@@ -30,17 +34,24 @@ def requests(request):
 
 
 def request_detail(request, request_id):
-    employees_list = load_employees("data/employees.json")
+    conn = get_connection()
 
-    requests_list = load_requests(
-        "data/requests.json",
-        employees_list
-    )
-
-    purchase_request = find_request_by_id(
-        requests_list,
-        request_id
-    )
+    try:
+        purchase_request = conn.execute("""
+            SELECT
+                requests.id,
+                requests.name,
+                requests.amount,
+                requests.contractor,
+                requests.status,
+                employees.name AS employee_name
+            FROM requests
+            JOIN employees
+                ON requests.employee_id = employees.id
+            WHERE requests.id = ?
+        """, (request_id,)).fetchone()
+    finally:
+        conn.close()
 
     context = {
         "purchase_request": purchase_request,
