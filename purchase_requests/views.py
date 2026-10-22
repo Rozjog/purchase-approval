@@ -29,7 +29,6 @@ def requests(request):
     )
 
 
-
 def request_detail(request, request_id):
     employees_list = load_employees("data/employees.json")
 
@@ -53,4 +52,3 @@ def request_detail(request, request_id):
         context,
         status=404 if purchase_request is None else 200,
     )
-

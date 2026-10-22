@@ -14,7 +14,6 @@ APPROVALS_FILE = "data/approvals.json"
 DECISIONS_FILE = "data/decisions.json"
 
 
-
 def decisions(request):
     employees_list = load_employees(
         "data/employees.json"
@@ -45,7 +44,6 @@ def decisions(request):
         "decisions/decision_list.html",
         context,
     )
-
 
 
 def decision_detail(request, decision_id):

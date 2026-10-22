@@ -6,7 +6,6 @@
 
 {% block content %}
     <h1 class="display-4">Purchase Approval</h1>
-
     <p class="lead">
         Система согласования закупок.
     </p>
@@ -21,29 +20,25 @@
 
     <a
         href="{% url 'employees:employees' %}"
-        class="btn btn-primary me-2"
-    >
+        class="btn btn-primary me-2">
         Сотрудники
     </a>
 
     <a
         href="{% url 'purchase_requests:requests' %}"
-        class="btn btn-primary me-2"
-    >
+        class="btn btn-primary me-2">
         Заявки
     </a>
 
     <a
         href="{% url 'approvals:approvals' %}"
-        class="btn btn-secondary me-2"
-    >
+        class="btn btn-secondary me-2">
         Согласования
     </a>
 
     <a
         href="{% url 'decisions:decisions' %}"
-        class="btn btn-secondary"
-    >
+        class="btn btn-secondary">
         Решения
     </a>
 

@@ -6,7 +6,6 @@ from storage import load_employees
 EMPLOYEES_FILE = "data/employees.json"
 
 
-
 def employees(request):
     employees_list = load_employees(
         "data/employees.json"
@@ -21,7 +20,6 @@ def employees(request):
         "employees/employee_list.html",
         context,
     )
-
 
 
 def employee_detail(request, employee_id):
@@ -44,4 +42,3 @@ def employee_detail(request, employee_id):
         context,
         status=404 if employee is None else 200,
     )
-

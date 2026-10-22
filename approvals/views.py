@@ -12,7 +12,6 @@ REQUESTS_FILE = "data/requests.json"
 APPROVALS_FILE = "data/approvals.json"
 
 
-
 def approvals(request):
     employees_list = load_employees("data/employees.json")
 
@@ -36,8 +35,6 @@ def approvals(request):
         "approvals/approval_list.html",
         context,
     )
-
-
 
 
 def approval_detail(request, approval_id):
@@ -69,4 +66,3 @@ def approval_detail(request, approval_id):
         context,
         status=404 if approval is None else 200,
     )
-
