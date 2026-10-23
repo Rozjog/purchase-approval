@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}
+Статистика закупок — Purchase Approval
+{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">Статистика закупок</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Всего заявок</h2>
+                <p class="display-6">{{ total_requests }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="h5">Общая сумма заявок</h2>
+                <p class="display-6">{{ total_amount }} ₽</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="h4 mt-4">Заявки по статусам</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Статус</th>
+            <th>Количество</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in request_statuses %}
+            <tr>
+                <td>{{ item.status }}</td>
+                <td>{{ item.requests_count }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="2">Данных нет</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2 class="h4 mt-4">Согласования по статусам</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Статус</th>
+            <th>Количество</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in approval_statuses %}
+            <tr>
+                <td>{{ item.status }}</td>
+                <td>{{ item.approvals_count }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="2">Данных нет</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2 class="h4 mt-4">Статусы с заявками</h2>
+
+{% for item in popular_statuses %}
+    <p>
+        {{ item.status }}:
+        {{ item.requests_count }}
+    </p>
+{% empty %}
+    <p>Подходящих статусов нет.</p>
+{% endfor %}
+
+<a
+    href="{% url 'purchase_requests:requests' %}"
+    class="btn btn-outline-secondary"
+>
+    ← К списку заявок
+</a>
+
+{% endblock %}

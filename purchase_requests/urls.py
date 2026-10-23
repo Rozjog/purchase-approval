@@ -6,5 +6,10 @@ app_name = "purchase_requests"
 
 urlpatterns = [
     path("", views.requests, name="requests"),
-    path("<int:request_id>/", views.request_detail, name="request_detail"),
+    path("statistics/", views.statistics, name="statistics"),
+    path(
+        "<int:request_id>/",
+        views.request_detail,
+        name="request_detail"
+    ),
 ]

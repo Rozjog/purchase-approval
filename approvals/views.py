@@ -1,30 +1,27 @@
 from django.shortcuts import render
-from models.approvals import find_approval_by_id
-from storage import (
-    load_approvals,
-    load_employees,
-    load_requests
-)
-
-
-EMPLOYEES_FILE = "data/employees.json"
-REQUESTS_FILE = "data/requests.json"
-APPROVALS_FILE = "data/approvals.json"
+from db.database import get_connection
 
 
 def approvals(request):
-    employees_list = load_employees("data/employees.json")
+    conn = get_connection()
 
-    requests_list = load_requests(
-        "data/requests.json",
-        employees_list
-    )
-
-    approvals_list = load_approvals(
-        "data/approvals.json",
-        requests_list,
-        employees_list
-    )
+    try:
+        approvals_list = conn.execute("""
+            SELECT
+                approvals.id,
+                approvals.status,
+                requests.name AS request_name,
+                requests.amount AS request_amount,
+                employees.name AS approver_name
+            FROM approvals
+            JOIN requests
+                ON approvals.request_id = requests.id
+            JOIN employees
+                ON approvals.employee_id = employees.id
+            ORDER BY approvals.id
+        """).fetchall()
+    finally:
+        conn.close()
 
     context = {
         "approvals": approvals_list,
@@ -38,23 +35,25 @@ def approvals(request):
 
 
 def approval_detail(request, approval_id):
-    employees_list = load_employees("data/employees.json")
+    conn = get_connection()
 
-    requests_list = load_requests(
-        "data/requests.json",
-        employees_list
-    )
-
-    approvals_list = load_approvals(
-        "data/approvals.json",
-        requests_list,
-        employees_list
-    )
-
-    approval = find_approval_by_id(
-        approvals_list,
-        approval_id
-    )
+    try:
+        approval = conn.execute("""
+            SELECT
+                approvals.id,
+                approvals.status,
+                requests.name AS request_name,
+                requests.amount AS request_amount,
+                employees.name AS approver_name
+            FROM approvals
+            JOIN requests
+                ON approvals.request_id = requests.id
+            JOIN employees
+                ON approvals.employee_id = employees.id
+            WHERE approvals.id = ?
+        """, (approval_id,)).fetchone()
+    finally:
+        conn.close()
 
     context = {
         "approval": approval,

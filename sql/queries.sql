@@ -35,8 +35,10 @@ WHERE status = 'Одобрена';
 
 SELECT
     requests.id,
-    requests.name AS request_name,
+    requests.name,
     requests.amount,
+    requests.contractor,
+    requests.status,
     employees.name AS employee_name
 FROM requests
 JOIN employees
@@ -46,9 +48,10 @@ ORDER BY requests.id;
 
 SELECT
     approvals.id,
+    approvals.status,
     requests.name AS request_name,
-    employees.name AS approver_name,
-    approvals.status
+    requests.amount AS request_amount,
+    employees.name AS approver_name
 FROM approvals
 JOIN requests
     ON approvals.request_id = requests.id
@@ -98,3 +101,18 @@ SELECT
 FROM requests
 ORDER BY amount DESC
 LIMIT 5 OFFSET 0;
+
+
+SELECT
+    decisions.id,
+    decisions.approval_id,
+    decisions.result,
+    decisions.comment,
+    requests.name AS request_name,
+    requests.amount AS request_amount
+FROM decisions
+JOIN approvals
+    ON decisions.approval_id = approvals.id
+JOIN requests
+    ON approvals.request_id = requests.id
+ORDER BY decisions.id;

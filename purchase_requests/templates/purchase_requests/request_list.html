@@ -7,13 +7,101 @@
 
 {% block content %}
 
-    <h1>Заявки на закупку</h1>
+<h1>Заявки на закупку</h1>
 
-    <p>Всего заявок: {{ requests|length }}</p>
+<h2 class="h5 mt-4">Поиск заявок</h2>
 
-    {% for purchase_request in requests %}
-        {% include "purchase_requests/includes/request_card.html" %}
-    {% empty %}
-        <p>Заявок пока нет.</p>
-    {% endfor %}
+<form method="get" class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <label for="min_amount" class="form-label">
+            Минимальная сумма
+        </label>
+
+        <input
+            type="number"
+            id="min_amount"
+            name="min_amount"
+            min="0"
+            class="form-control"
+            placeholder="Например, 10000"
+            value="{{ min_amount }}"
+        >
+    </div>
+
+    <div class="col-md-4">
+        <label for="status" class="form-label">
+            Статус заявки
+        </label>
+
+        <select
+            id="status"
+            name="status"
+            class="form-select"
+        >
+            <option value="">Все статусы</option>
+
+            <option value="Создана"
+                {% if selected_status == "Создана" %}
+                    selected
+                {% endif %}
+            >
+                Создана
+            </option>
+
+            <option value="Одобрена"
+                {% if selected_status == "Одобрена" %}
+                    selected
+                {% endif %}
+            >
+                Одобрена
+            </option>
+
+            <option value="Отклонена"
+                {% if selected_status == "Отклонена" %}
+                    selected
+                {% endif %}
+            >
+                Отклонена
+            </option>
+
+            <option value="Отменена"
+                {% if selected_status == "Отменена" %}
+                    selected
+                {% endif %}
+            >
+                Отменена
+            </option>
+        </select>
+    </div>
+
+    <div class="col-md-4 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-primary">
+            Найти
+        </button>
+
+        <a
+            href="{% url 'purchase_requests:requests' %}"
+            class="btn btn-outline-secondary"
+        >
+            Сбросить
+        </a>
+    </div>
+
+</form>
+
+{% if error %}
+    <div class="alert alert-danger">
+        {{ error }}
+    </div>
+{% endif %}
+
+<p>Найдено заявок: {{ requests|length }}</p>
+
+{% for purchase_request in requests %}
+    {% include "purchase_requests/includes/request_card.html" %}
+{% empty %}
+    <p>По вашему запросу заявки не найдены.</p>
+{% endfor %}
+
 {% endblock %}

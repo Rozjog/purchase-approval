@@ -1,39 +1,28 @@
 from django.shortcuts import render
-from models.decisions import find_decision_by_id
-from storage import (
-    load_approvals,
-    load_decisions,
-    load_employees,
-    load_requests
-)
-
-
-EMPLOYEES_FILE = "data/employees.json"
-REQUESTS_FILE = "data/requests.json"
-APPROVALS_FILE = "data/approvals.json"
-DECISIONS_FILE = "data/decisions.json"
+from db.database import get_connection
 
 
 def decisions(request):
-    employees_list = load_employees(
-        "data/employees.json"
-    )
+    conn = get_connection()
 
-    requests_list = load_requests(
-        "data/requests.json",
-        employees_list
-    )
-
-    approvals_list = load_approvals(
-        "data/approvals.json",
-        requests_list,
-        employees_list
-    )
-
-    decisions_list = load_decisions(
-        "data/decisions.json",
-        approvals_list
-    )
+    try:
+        decisions_list = conn.execute("""
+            SELECT
+                decisions.id,
+                decisions.approval_id,
+                decisions.result,
+                decisions.comment,
+                requests.name AS request_name,
+                requests.amount AS request_amount
+            FROM decisions
+            JOIN approvals
+                ON decisions.approval_id = approvals.id
+            JOIN requests
+                ON approvals.request_id = requests.id
+            ORDER BY decisions.id
+        """).fetchall()
+    finally:
+        conn.close()
 
     context = {
         "decisions": decisions_list,
@@ -47,30 +36,26 @@ def decisions(request):
 
 
 def decision_detail(request, decision_id):
-    employees_list = load_employees(
-        "data/employees.json"
-    )
+    conn = get_connection()
 
-    requests_list = load_requests(
-        "data/requests.json",
-        employees_list
-    )
-
-    approvals_list = load_approvals(
-        "data/approvals.json",
-        requests_list,
-        employees_list
-    )
-
-    decisions_list = load_decisions(
-        "data/decisions.json",
-        approvals_list
-    )
-
-    decision = find_decision_by_id(
-        decisions_list,
-        decision_id
-    )
+    try:
+        decision = conn.execute("""
+            SELECT
+                decisions.id,
+                decisions.approval_id,
+                decisions.result,
+                decisions.comment,
+                requests.name AS request_name,
+                requests.amount AS request_amount
+            FROM decisions
+            JOIN approvals
+                ON decisions.approval_id = approvals.id
+            JOIN requests
+                ON approvals.request_id = requests.id
+            WHERE decisions.id = ?
+        """, (decision_id,)).fetchone()
+    finally:
+        conn.close()
 
     context = {
         "decision": decision,
