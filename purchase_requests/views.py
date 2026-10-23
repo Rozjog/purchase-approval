@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from db.database import get_connection
 
-
-
+    
 def requests(request):
     min_amount_text = request.GET.get("min_amount", "").strip()
     status = request.GET.get("status", "").strip()
