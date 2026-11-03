@@ -1,18 +1,11 @@
-from django.shortcuts import render
-from db.database import get_connection
+
+from django.shortcuts import get_object_or_404, render
+
+from employees.models import Employee
 
 
 def employees(request):
-    conn = get_connection()
-
-    try:
-        employees_list = conn.execute("""
-            SELECT id, name, role
-            FROM employees
-            ORDER BY name
-        """).fetchall()
-    finally:
-        conn.close()
+    employees_list = Employee.objects.order_by("name")
 
     context = {
         "employees": employees_list,
@@ -26,16 +19,10 @@ def employees(request):
 
 
 def employee_detail(request, employee_id):
-    conn = get_connection()
-
-    try:
-        employee = conn.execute("""
-            SELECT id, name, role
-            FROM employees
-            WHERE id = ?
-        """, (employee_id,)).fetchone()
-    finally:
-        conn.close()
+    employee = get_object_or_404(
+        Employee,
+        pk=employee_id,
+    )
 
     context = {
         "employee": employee,
@@ -45,5 +32,4 @@ def employee_detail(request, employee_id):
         request,
         "employees/employee_detail.html",
         context,
-        status=404 if employee is None else 200,
     )

@@ -13,11 +13,38 @@
 
 <form method="get" class="row g-3 mb-4">
 
+    <div class="col-md-6">
+        <label for="q" class="form-label">
+            Название или контрагент
+        </label>
+        <input
+            type="text"
+            id="q"
+            name="q"
+            class="form-control"
+            placeholder="Введите текст для поиска"
+            value="{{ search }}"
+        >
+    </div>
+
+    <div class="col-md-6">
+        <label for="employee" class="form-label">
+            Имя сотрудника
+        </label>
+        <input
+            type="text"
+            id="employee"
+            name="employee"
+            class="form-control"
+            placeholder="Например, Иван"
+            value="{{ employee }}"
+        >
+    </div>
+
     <div class="col-md-4">
         <label for="min_amount" class="form-label">
             Минимальная сумма
         </label>
-
         <input
             type="number"
             id="min_amount"
@@ -33,7 +60,6 @@
         <label for="status" class="form-label">
             Статус заявки
         </label>
-
         <select
             id="status"
             name="status"
@@ -42,40 +68,64 @@
             <option value="">Все статусы</option>
 
             <option value="Создана"
-                {% if selected_status == "Создана" %}
-                    selected
-                {% endif %}
-            >
+                {% if selected_status == "Создана" %}selected{% endif %}>
                 Создана
             </option>
 
             <option value="Одобрена"
-                {% if selected_status == "Одобрена" %}
-                    selected
-                {% endif %}
-            >
+                {% if selected_status == "Одобрена" %}selected{% endif %}>
                 Одобрена
             </option>
 
             <option value="Отклонена"
-                {% if selected_status == "Отклонена" %}
-                    selected
-                {% endif %}
-            >
+                {% if selected_status == "Отклонена" %}selected{% endif %}>
                 Отклонена
             </option>
 
             <option value="Отменена"
-                {% if selected_status == "Отменена" %}
-                    selected
-                {% endif %}
-            >
+                {% if selected_status == "Отменена" %}selected{% endif %}>
                 Отменена
             </option>
         </select>
     </div>
 
-    <div class="col-md-4 d-flex align-items-end gap-2">
+    <div class="col-md-4">
+        <label for="sort" class="form-label">
+            Сортировать по
+        </label>
+        <select
+            id="sort"
+            name="sort"
+            class="form-select"
+        >
+            <option value="id"
+                {% if sort == "id" %}selected{% endif %}>
+                Идентификатору
+            </option>
+
+            <option value="name"
+                {% if sort == "name" %}selected{% endif %}>
+                Названию
+            </option>
+
+            <option value="amount_asc"
+                {% if sort == "amount_asc" %}selected{% endif %}>
+                Сумме (по возрастанию)
+            </option>
+
+            <option value="amount_desc"
+                {% if sort == "amount_desc" %}selected{% endif %}>
+                Сумме (по убыванию)
+            </option>
+
+            <option value="employee"
+                {% if sort == "employee" %}selected{% endif %}>
+                Имени сотрудника
+            </option>
+        </select>
+    </div>
+
+    <div class="col-12 d-flex gap-2">
         <button type="submit" class="btn btn-primary">
             Найти
         </button>
@@ -96,12 +146,53 @@
     </div>
 {% endif %}
 
-<p>Найдено заявок: {{ requests|length }}</p>
+<p>Найдено заявок: {{ page_obj.paginator.count }}</p>
 
 {% for purchase_request in requests %}
     {% include "purchase_requests/includes/request_card.html" %}
 {% empty %}
     <p>По вашему запросу заявки не найдены.</p>
 {% endfor %}
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav aria-label="Навигация по страницам">
+    <ul class="pagination justify-content-center mt-4">
+
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a
+                    class="page-link"
+                    href="{% querystring page=page_obj.previous_page_number %}"
+                >
+                    Назад
+                </a>
+            </li>
+        {% endif %}
+
+        {% for page_number in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_number == page_obj.number %}active{% endif %}">
+                <a
+                    class="page-link"
+                    href="{% querystring page=page_number %}"
+                >
+                    {{ page_number }}
+                </a>
+            </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a
+                    class="page-link"
+                    href="{% querystring page=page_obj.next_page_number %}"
+                >
+                    Далее
+                </a>
+            </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}
 
 {% endblock %}

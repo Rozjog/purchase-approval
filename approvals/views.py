@@ -1,27 +1,12 @@
-from django.shortcuts import render
-from db.database import get_connection
+from django.shortcuts import get_object_or_404, render
+from approvals.models import Approval
 
 
 def approvals(request):
-    conn = get_connection()
-
-    try:
-        approvals_list = conn.execute("""
-            SELECT
-                approvals.id,
-                approvals.status,
-                requests.name AS request_name,
-                requests.amount AS request_amount,
-                employees.name AS approver_name
-            FROM approvals
-            JOIN requests
-                ON approvals.request_id = requests.id
-            JOIN employees
-                ON approvals.employee_id = employees.id
-            ORDER BY approvals.id
-        """).fetchall()
-    finally:
-        conn.close()
+    approvals_list = Approval.objects.select_related(
+        "request",
+        "employee",
+    ).order_by("id")
 
     context = {
         "approvals": approvals_list,
@@ -35,25 +20,13 @@ def approvals(request):
 
 
 def approval_detail(request, approval_id):
-    conn = get_connection()
-
-    try:
-        approval = conn.execute("""
-            SELECT
-                approvals.id,
-                approvals.status,
-                requests.name AS request_name,
-                requests.amount AS request_amount,
-                employees.name AS approver_name
-            FROM approvals
-            JOIN requests
-                ON approvals.request_id = requests.id
-            JOIN employees
-                ON approvals.employee_id = employees.id
-            WHERE approvals.id = ?
-        """, (approval_id,)).fetchone()
-    finally:
-        conn.close()
+    approval = get_object_or_404(
+        Approval.objects.select_related(
+            "request",
+            "employee",
+        ),
+        pk=approval_id,
+    )
 
     context = {
         "approval": approval,
@@ -63,5 +36,4 @@ def approval_detail(request, approval_id):
         request,
         "approvals/approval_detail.html",
         context,
-        status=404 if approval is None else 200,
     )
