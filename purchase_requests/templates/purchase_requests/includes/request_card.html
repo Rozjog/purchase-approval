@@ -4,6 +4,7 @@
         <h2 class="card-title">
             {{ purchase_request.name|default:"Без названия" }}
         </h2>
+
         <p class="card-text">
             <strong>Сумма:</strong>
             {{ purchase_request.amount }} руб.
@@ -25,7 +26,7 @@
         </p>
 
         <a
-            href="{% url 'purchase_requests:request_detail' purchase_request.id %}"
+            href="{{ purchase_request.get_absolute_url }}"
             class="btn btn-primary"
         >
             Подробнее

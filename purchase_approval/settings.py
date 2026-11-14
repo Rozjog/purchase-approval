@@ -39,10 +39,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     "homepage",
-    "employees",
-    "purchase_requests",
-    "approvals",
-    "decisions",
+    "employees.apps.EmployeesConfig",
+    "purchase_requests.apps.PurchaseRequestsConfig",
+    "approvals.apps.ApprovalsConfig",
+    "decisions.apps.DecisionsConfig",
 ]
 
 MIDDLEWARE = [
@@ -62,11 +62,12 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
+                "homepage.context_processors.purchase_context",
             ],
         },
     },

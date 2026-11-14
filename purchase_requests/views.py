@@ -1,17 +1,24 @@
-from django.shortcuts import get_object_or_404, render
-from purchase_requests.models import Request
-from django.db.models import Count, Q, Sum
-from approvals.models import Approval
+
 from django.core.paginator import Paginator
+from django.db.models import Count, Q, Sum
+from django.shortcuts import (
+    get_object_or_404,
+    redirect,
+    render,
+)
+
+from approvals.models import Approval
 from employees.models import Employee
+from .models import Request
 
 
 def requests(request):
     search = request.GET.get("q", "").strip()
     employee = request.GET.get("employee", "").strip()
-    min_amount_text = request.GET.get("min_amount", "").strip()
+    min_amount_text = request.GET.get(
+        "min_amount", ""
+    ).strip()
     status = request.GET.get("status", "").strip()
-
     sort = request.GET.get("sort", "id")
 
     error = ""
@@ -19,10 +26,6 @@ def requests(request):
     requests_list = Request.objects.select_related(
         "employee"
     )
-
-    paginator = Paginator(requests_list, 2)
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
 
     if search:
         requests_list = requests_list.filter(
@@ -70,6 +73,10 @@ def requests(request):
         "id",
     )
 
+    paginator = Paginator(requests_list, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     context = {
         "requests": page_obj,
         "page_obj": page_obj,
@@ -88,20 +95,28 @@ def requests(request):
     )
 
 
-def request_detail(request, request_id):
+def request_detail(request, slug):
     purchase_request = get_object_or_404(
         Request.objects.select_related("employee"),
-        pk=request_id,
+        slug=slug,
     )
-
-    context = {
-        "purchase_request": purchase_request,
-    }
 
     return render(
         request,
         "purchase_requests/request_detail.html",
-        context,
+        {"purchase_request": purchase_request},
+    )
+
+
+def request_detail_by_id(request, request_id):
+    """Перенаправление со старого числового адреса."""
+    purchase_request = get_object_or_404(
+        Request,
+        pk=request_id,
+    )
+
+    return redirect(
+        purchase_request.get_absolute_url()
     )
 
 
@@ -128,13 +143,13 @@ def statistics(request):
 
     top_requests = (
         Request.objects
-        .exclude(status="Отменена")
+        .exclude(status=Request.Status.CANCELLED)
         .order_by("-amount", "id")[:5]
     )
 
     approved_total = (
         Request.objects
-        .filter(status="Одобрена")
+        .approved()
         .aggregate(total=Sum("amount"))
     )["total"] or 0
 
