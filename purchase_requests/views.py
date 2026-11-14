@@ -1,10 +1,9 @@
 from django.shortcuts import get_object_or_404, render
-from db.database import get_connection
 from purchase_requests.models import Request
 from django.db.models import Count, Q, Sum
 from approvals.models import Approval
 from django.core.paginator import Paginator
-
+from employees.models import Employee
 
 
 def requests(request):
@@ -20,7 +19,7 @@ def requests(request):
     requests_list = Request.objects.select_related(
         "employee"
     )
-    
+
     paginator = Paginator(requests_list, 2)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -133,12 +132,26 @@ def statistics(request):
         .order_by("-amount", "id")[:5]
     )
 
+    approved_total = (
+        Request.objects
+        .filter(status="Одобрена")
+        .aggregate(total=Sum("amount"))
+    )["total"] or 0
+
+    employee_counts = (
+        Employee.objects
+        .annotate(requests_count=Count("requests"))
+        .order_by("-requests_count", "name")
+    )
+
     context = {
         "total_requests": total_requests,
         "total_amount": total_amount,
         "request_statuses": request_statuses,
         "approval_statuses": approval_statuses,
         "top_requests": top_requests,
+        "approved_total": approved_total,
+        "employee_counts": employee_counts,
     }
 
     return render(
@@ -146,4 +159,3 @@ def statistics(request):
         "purchase_requests/statistics.html",
         context,
     )
-

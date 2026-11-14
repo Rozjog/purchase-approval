@@ -8,7 +8,7 @@ class Employee(models.Model):
     )
 
     role = models.CharField(
-        max_length=100,
+        max_length=120,
         verbose_name="Должность",
     )
 

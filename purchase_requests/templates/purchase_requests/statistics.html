@@ -74,6 +74,41 @@
     </tbody>
 </table>
 
+<h2 class="h4 mt-4">Сумма одобренных заявок</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <p class="display-6 mb-0">
+            {{ approved_total }} ₽
+        </p>
+    </div>
+</div>
+
+<h2 class="h4 mt-4">Заявки по сотрудникам</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Сотрудник</th>
+            <th>Количество заявок</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for employee in employee_counts %}
+            <tr>
+                <td>{{ employee.name }}</td>
+                <td>{{ employee.requests_count }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="2">
+                    Сотрудников пока нет
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 <a
     href="{% url 'purchase_requests:requests' %}"
     class="btn btn-outline-secondary"
