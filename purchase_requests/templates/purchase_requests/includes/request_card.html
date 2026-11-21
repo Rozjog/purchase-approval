@@ -1,6 +1,6 @@
-
 <article class="card request-card mb-3">
     <div class="card-body">
+
         <h2 class="card-title">
             {{ purchase_request.name|default:"Без названия" }}
         </h2>
@@ -25,11 +25,42 @@
             {{ purchase_request.status }}
         </p>
 
-        <a
-            href="{{ purchase_request.get_absolute_url }}"
-            class="btn btn-primary"
-        >
-            Подробнее
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+
+            <a
+                href="{{ purchase_request.get_absolute_url }}"
+                class="btn btn-primary"
+            >
+                Подробнее
+            </a>
+
+            {% if purchase_request.status == "Создана" and not purchase_request.has_approvals %}
+
+                <a
+                    href="{% url 'purchase_requests:request_update' purchase_request.id %}"
+                    class="btn btn-warning"
+                >
+                    Редактировать
+                </a>
+
+                <form
+                    method="post"
+                    action="{% url 'purchase_requests:request_cancel' purchase_request.id %}"
+                    class="d-inline"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-danger"
+                    >
+                        Отменить заявку
+                    </button>
+                </form>
+
+            {% endif %}
+
+        </div>
+
     </div>
 </article>

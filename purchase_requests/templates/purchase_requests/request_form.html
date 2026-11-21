@@ -1,12 +1,24 @@
 {% extends "base.html" %}
 
 {% block title %}
-Создание заявки — Purchase Approval
+    {% if purchase_request %}
+        Редактирование заявки — Purchase Approval
+    {% else %}
+        Создание заявки — Purchase Approval
+    {% endif %}
 {% endblock %}
 
 {% block content %}
 
-<h1 class="mb-4">Создание заявки на закупку</h1>
+{% if purchase_request %}
+    <h1 class="mb-4">
+        Редактирование заявки №{{ purchase_request.id }}
+    </h1>
+{% else %}
+    <h1 class="mb-4">
+        Создание заявки на закупку
+    </h1>
+{% endif %}
 
 <form method="post">
 
@@ -41,16 +53,24 @@
     {% endfor %}
 
     <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-primary">
-            Создать заявку
-        </button>
+
+        {% if purchase_request %}
+            <button type="submit" class="btn btn-primary">
+                Сохранить изменения
+            </button>
+        {% else %}
+            <button type="submit" class="btn btn-primary">
+                Создать заявку
+            </button>
+        {% endif %}
 
         <a
             href="{% url 'purchase_requests:requests' %}"
             class="btn btn-outline-secondary"
         >
-            Отмена
+            Назад к списку
         </a>
+
     </div>
 
 </form>

@@ -1,6 +1,7 @@
 from django import forms
 from .models import Request
 
+
 class RequestFilterForm(forms.Form):
     q = forms.CharField(
         required=False,
@@ -87,6 +88,20 @@ class RequestForm(forms.ModelForm):
             "amount": "Сумма закупки",
             "contractor": "Контрагент",
             "employee": "Сотрудник",
+        }
+
+        help_texts = {
+            "name": "Укажите, что необходимо закупить.",
+            "amount": (
+                "Введите общую сумму закупки в рублях. "
+                "Сумма должна быть больше нуля."
+            ),
+            "contractor": (
+                "Укажите организацию или поставщика."
+            ),
+            "employee": (
+                "Выберите сотрудника, создавшего заявку."
+            ),
         }
 
         widgets = {

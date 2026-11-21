@@ -21,6 +21,16 @@ urlpatterns = [
         name="request_create",
     ),
     path(
+        "<int:request_id>/edit/",
+        views.request_update,
+        name="request_update",
+    ),
+    path(
+        "<int:request_id>/cancel/",
+        views.request_cancel,
+        name="request_cancel",
+    ),
+    path(
         "<int:request_id>/",
         views.request_detail_by_id,
         name="request_detail_by_id",

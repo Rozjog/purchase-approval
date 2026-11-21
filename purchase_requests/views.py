@@ -1,15 +1,13 @@
-
 from django.core.paginator import Paginator
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Exists, OuterRef, Q, Sum
 from django.shortcuts import (
     get_object_or_404,
     redirect,
     render,
 )
-
+from django.views.decorators.http import require_POST
 from approvals.models import Approval
 from employees.models import Employee
-
 from .forms import RequestFilterForm, RequestForm
 from .models import Request
 
@@ -35,7 +33,17 @@ def requests(request):
     elif form.is_bound:
         error = "Проверьте корректность параметров фильтрации."
 
-    requests_list = Request.objects.select_related("employee")
+    requests_list = (
+        Request.objects
+        .select_related("employee")
+        .annotate(
+            has_approvals=Exists(
+                Approval.objects.filter(
+                    request_id=OuterRef("pk")
+                )
+            )
+        )
+    )
 
     if search:
         requests_list = requests_list.filter(
@@ -95,7 +103,6 @@ def request_create(request):
 
         if form.is_valid():
             form.save()
-
             return redirect("purchase_requests:requests")
 
     else:
@@ -106,6 +113,62 @@ def request_create(request):
         "purchase_requests/request_form.html",
         {"form": form},
     )
+
+
+def request_update(request, request_id):
+    # Редактируем только созданные заявки
+    # без существующих согласований.
+    purchase_request = get_object_or_404(
+        Request.objects.created().filter(
+            approvals__isnull=True
+        ),
+        pk=request_id,
+    )
+
+    if request.method == "POST":
+        # Связываем форму с существующей заявкой.
+        form = RequestForm(
+            request.POST,
+            instance=purchase_request,
+        )
+
+        if form.is_valid():
+            # Обновляем запись, а не создаём новую.
+            form.save()
+
+            return redirect("purchase_requests:requests")
+
+    else:
+        # Отображаем текущие значения заявки.
+        form = RequestForm(
+            instance=purchase_request
+        )
+
+    return render(
+        request,
+        "purchase_requests/request_form.html",
+        {
+            "form": form,
+            "purchase_request": purchase_request,
+        },
+    )
+
+
+@require_POST
+def request_cancel(request, request_id):
+    # Отменять можно только созданные заявки
+    # без согласований.
+    purchase_request = get_object_or_404(
+        Request.objects.created().filter(
+            approvals__isnull=True
+        ),
+        pk=request_id,
+    )
+
+    # Меняем статус, не удаляя запись.
+    purchase_request.cancel()
+
+    return redirect("purchase_requests:requests")
 
 
 def request_detail(request, slug):
@@ -122,6 +185,7 @@ def request_detail(request, slug):
 
 
 def request_detail_by_id(request, request_id):
+    """Перенаправление со старого числового адреса."""
     purchase_request = get_object_or_404(
         Request,
         pk=request_id,
