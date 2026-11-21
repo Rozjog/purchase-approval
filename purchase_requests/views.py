@@ -9,54 +9,63 @@ from django.shortcuts import (
 
 from approvals.models import Approval
 from employees.models import Employee
+
+from .forms import RequestFilterForm
 from .models import Request
 
 
 def requests(request):
-    search = request.GET.get("q", "").strip()
-    employee = request.GET.get("employee", "").strip()
-    min_amount_text = request.GET.get(
-        "min_amount", ""
-    ).strip()
-    status = request.GET.get("status", "").strip()
-    sort = request.GET.get("sort", "id")
+    form = RequestFilterForm(request.GET or None)
+    form_valid = form.is_bound and form.is_valid()
 
+    # Значения по умолчанию.
+    search = ""
+    employee = ""
+    min_amount = None
+    status = ""
+    sort = "id"
     error = ""
 
-    requests_list = Request.objects.select_related(
-        "employee"
-    )
+    # Используем только проверенные значения формы.
+    if form_valid:
+        search = form.cleaned_data.get("q") or ""
+        employee = form.cleaned_data.get("employee") or ""
+        min_amount = form.cleaned_data.get("min_amount")
+        status = form.cleaned_data.get("status") or ""
+        sort = form.cleaned_data.get("sort") or "id"
 
+    elif form.is_bound:
+        error = "Проверьте корректность параметров фильтрации."
+
+    # Сохраняем получение связанных сотрудников через JOIN.
+    requests_list = Request.objects.select_related("employee")
+
+    # Поиск по названию и контрагенту.
     if search:
         requests_list = requests_list.filter(
             Q(name__icontains=search)
             | Q(contractor__icontains=search)
         )
 
+    # Фильтрация по имени сотрудника.
     if employee:
         requests_list = requests_list.filter(
             employee__name__icontains=employee
         )
 
-    if min_amount_text:
-        try:
-            min_amount = int(min_amount_text)
+    # Фильтрация по минимальной сумме.
+    if min_amount is not None:
+        requests_list = requests_list.filter(
+            amount__gte=min_amount
+        )
 
-            if min_amount < 0:
-                raise ValueError
-
-            requests_list = requests_list.filter(
-                amount__gte=min_amount
-            )
-
-        except ValueError:
-            error = "Введите неотрицательную целую сумму."
-
+    # Фильтрация по статусу.
     if status:
         requests_list = requests_list.filter(
             status=status
         )
 
+    # Разрешённые варианты сортировки.
     sort_fields = {
         "id": "id",
         "name": "name",
@@ -65,14 +74,12 @@ def requests(request):
         "employee": "employee__name",
     }
 
-    if sort not in sort_fields:
-        sort = "id"
-
     requests_list = requests_list.order_by(
-        sort_fields[sort],
+        sort_fields.get(sort, "id"),
         "id",
     )
 
+    # Пагинация: по пять заявок на страницу.
     paginator = Paginator(requests_list, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -80,11 +87,7 @@ def requests(request):
     context = {
         "requests": page_obj,
         "page_obj": page_obj,
-        "search": search,
-        "employee": employee,
-        "min_amount": min_amount_text,
-        "selected_status": status,
-        "sort": sort,
+        "form": form,
         "error": error,
     }
 

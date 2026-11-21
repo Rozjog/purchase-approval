@@ -3,12 +3,10 @@ from django.db import models
 from django.db.models import Case, Value, When
 from django.urls import reverse
 from django.utils.text import slugify
-
 from unidecode import unidecode
 
 
 class RequestQuerySet(models.QuerySet):
-    """Дополнительные запросы к заявкам."""
 
     def created(self):
         return self.filter(status=self.model.Status.CREATED)
