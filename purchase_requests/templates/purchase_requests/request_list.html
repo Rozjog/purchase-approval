@@ -8,6 +8,13 @@
 
 <h1>Заявки на закупку</h1>
 
+<a
+    href="{% url 'purchase_requests:request_create' %}"
+    class="btn btn-primary mb-3"
+>
+    Создать заявку
+</a>
+
 <h2 class="h5 mt-4">Поиск заявок</h2>
 
 {% if error %}

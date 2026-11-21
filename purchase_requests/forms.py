@@ -1,7 +1,6 @@
 from django import forms
 from .models import Request
 
-
 class RequestFilterForm(forms.Form):
     q = forms.CharField(
         required=False,
@@ -69,3 +68,60 @@ class RequestFilterForm(forms.Form):
             attrs={"class": "form-select"}
         ),
     )
+
+
+class RequestForm(forms.ModelForm):
+
+    class Meta:
+        model = Request
+
+        fields = [
+            "name",
+            "amount",
+            "contractor",
+            "employee",
+        ]
+
+        labels = {
+            "name": "Название заявки",
+            "amount": "Сумма закупки",
+            "contractor": "Контрагент",
+            "employee": "Сотрудник",
+        }
+
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Например, закупка ноутбуков",
+                }
+            ),
+            "amount": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": 1,
+                    "placeholder": "Введите сумму в рублях",
+                }
+            ),
+            "contractor": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Название контрагента",
+                }
+            ),
+            "employee": forms.Select(
+                attrs={
+                    "class": "form-select",
+                }
+            ),
+        }
+
+    def clean_amount(self):
+        amount = self.cleaned_data["amount"]
+
+        if amount <= 0:
+            raise forms.ValidationError(
+                "Сумма закупки должна быть больше нуля."
+            )
+
+        return amount

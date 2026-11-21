@@ -1,6 +1,4 @@
-
 from django.urls import path
-
 from . import views
 
 
@@ -16,6 +14,11 @@ urlpatterns = [
         "statistics/",
         views.statistics,
         name="statistics",
+    ),
+    path(
+        "create/",
+        views.request_create,
+        name="request_create",
     ),
     path(
         "<int:request_id>/",

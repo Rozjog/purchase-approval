@@ -10,7 +10,7 @@ from django.shortcuts import (
 from approvals.models import Approval
 from employees.models import Employee
 
-from .forms import RequestFilterForm
+from .forms import RequestFilterForm, RequestForm
 from .models import Request
 
 
@@ -18,7 +18,6 @@ def requests(request):
     form = RequestFilterForm(request.GET or None)
     form_valid = form.is_bound and form.is_valid()
 
-    # Значения по умолчанию.
     search = ""
     employee = ""
     min_amount = None
@@ -26,7 +25,6 @@ def requests(request):
     sort = "id"
     error = ""
 
-    # Используем только проверенные значения формы.
     if form_valid:
         search = form.cleaned_data.get("q") or ""
         employee = form.cleaned_data.get("employee") or ""
@@ -37,35 +35,29 @@ def requests(request):
     elif form.is_bound:
         error = "Проверьте корректность параметров фильтрации."
 
-    # Сохраняем получение связанных сотрудников через JOIN.
     requests_list = Request.objects.select_related("employee")
 
-    # Поиск по названию и контрагенту.
     if search:
         requests_list = requests_list.filter(
             Q(name__icontains=search)
             | Q(contractor__icontains=search)
         )
 
-    # Фильтрация по имени сотрудника.
     if employee:
         requests_list = requests_list.filter(
             employee__name__icontains=employee
         )
 
-    # Фильтрация по минимальной сумме.
     if min_amount is not None:
         requests_list = requests_list.filter(
             amount__gte=min_amount
         )
 
-    # Фильтрация по статусу.
     if status:
         requests_list = requests_list.filter(
             status=status
         )
 
-    # Разрешённые варианты сортировки.
     sort_fields = {
         "id": "id",
         "name": "name",
@@ -79,7 +71,6 @@ def requests(request):
         "id",
     )
 
-    # Пагинация: по пять заявок на страницу.
     paginator = Paginator(requests_list, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -98,6 +89,25 @@ def requests(request):
     )
 
 
+def request_create(request):
+    if request.method == "POST":
+        form = RequestForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+
+            return redirect("purchase_requests:requests")
+
+    else:
+        form = RequestForm()
+
+    return render(
+        request,
+        "purchase_requests/request_form.html",
+        {"form": form},
+    )
+
+
 def request_detail(request, slug):
     purchase_request = get_object_or_404(
         Request.objects.select_related("employee"),
@@ -112,7 +122,6 @@ def request_detail(request, slug):
 
 
 def request_detail_by_id(request, request_id):
-    """Перенаправление со старого числового адреса."""
     purchase_request = get_object_or_404(
         Request,
         pk=request_id,

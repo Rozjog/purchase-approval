@@ -1,5 +1,5 @@
-
-from django.db import models
+from uuid import uuid4
+from django.db import models, transaction
 from django.db.models import Case, Value, When
 from django.urls import reverse
 from django.utils.text import slugify
@@ -87,10 +87,12 @@ class Request(models.Model):
     def _build_slug(self):
         base_slug = slugify(unidecode(self.name)) or "request"
         suffix = f"-{self.pk}"
+
         base_slug = (
             base_slug[:180 - len(suffix)].rstrip("-")
             or "request"
         )
+
         return f"{base_slug}{suffix}"
 
     def save(self, *args, **kwargs):
@@ -98,9 +100,22 @@ class Request(models.Model):
             return super().save(*args, **kwargs)
 
         if self.pk is None:
-            super().save(*args, **kwargs)
-            self.slug = self._build_slug()
-            return super().save(update_fields=["slug"])
+            using = kwargs.get("using")
+
+            with transaction.atomic(using=using):
+                # Временный уникальный slug нужен
+                # до получения ID новой заявки.
+                self.slug = f"pending-{uuid4().hex}"
+
+                super().save(*args, **kwargs)
+
+                # После сохранения ID уже известен.
+                self.slug = self._build_slug()
+
+                return super().save(
+                    update_fields=["slug"],
+                    using=using,
+                )
 
         self.slug = self._build_slug()
 
