@@ -50,6 +50,13 @@ class Request(models.Model):
         verbose_name="Контрагент",
     )
 
+    image = models.ImageField(
+    upload_to="requests/",
+    blank=True,
+    null=True,
+    verbose_name="Изображение заявки",
+    )
+
     employee = models.ForeignKey(
         "employees.Employee",
         on_delete=models.PROTECT,

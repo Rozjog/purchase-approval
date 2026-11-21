@@ -1,9 +1,13 @@
-
 from django.test import TestCase
 from django.urls import reverse
-
 from employees.models import Employee
 from .models import Request
+from io import BytesIO
+from tempfile import TemporaryDirectory
+from PIL import Image
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import override_settings
+from approvals.models import Approval
 
 
 class RequestTests(TestCase):
@@ -133,3 +137,224 @@ class RequestTests(TestCase):
             len(response_page2.context["page_obj"].object_list),
             2,
         )
+
+
+class RequestFormScenarioTests(TestCase):
+
+    def setUp(self):
+        self.employee = Employee.objects.create(
+            name="Тестовый сотрудник",
+            role="Руководитель отдела",
+        )
+
+        self.purchase_request = Request.objects.create(
+            name="Тестовая заявка",
+            amount=20000,
+            contractor="Тестовый поставщик",
+            employee=self.employee,
+        )
+
+        self.valid_data = {
+            "name": "Закупка оборудования",
+            "amount": "300000",
+            "contractor": "Новый поставщик",
+            "employee": str(self.employee.pk),
+        }
+
+    def test_create_request(self):
+
+        url = reverse("purchase_requests:request_create")
+        old_count = Request.objects.count()
+
+        response = self.client.post(url, self.valid_data)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            Request.objects.count(),
+            old_count + 1,
+        )
+
+        created = Request.objects.latest("id")
+
+        self.assertEqual(created.status, Request.Status.CREATED)
+        self.assertEqual(created.amount, 300000)
+        self.assertTrue(created.slug)
+
+        created.refresh_from_db()
+        self.assertTrue(created.requires_director)
+
+    def test_invalid_amount(self):
+
+        url = reverse("purchase_requests:request_create")
+
+        data = {
+            **self.valid_data,
+            "amount": "0",
+        }
+
+        old_count = Request.objects.count()
+        response = self.client.post(url, data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            Request.objects.count(),
+            old_count,
+        )
+
+        self.assertIn(
+            "amount",
+            response.context["form"].errors,
+        )
+
+    def test_update_request(self):
+
+        url = reverse(
+            "purchase_requests:request_update",
+            args=[self.purchase_request.pk],
+        )
+
+        old_slug = self.purchase_request.slug
+        old_count = Request.objects.count()
+
+        response = self.client.post(url, self.valid_data)
+
+        self.assertEqual(response.status_code, 302)
+
+        self.purchase_request.refresh_from_db()
+
+        self.assertEqual(
+            self.purchase_request.name,
+            "Закупка оборудования",
+        )
+        self.assertEqual(self.purchase_request.amount, 300000)
+        self.assertEqual(self.purchase_request.slug, old_slug)
+        self.assertEqual(Request.objects.count(), old_count)
+
+    def test_update_missing_request(self):
+
+        url = reverse(
+            "purchase_requests:request_update",
+            args=[999999],
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_update_with_approval_forbidden(self):
+
+        Approval.objects.create(
+            request=self.purchase_request,
+            employee=self.employee,
+        )
+
+        url = reverse(
+            "purchase_requests:request_update",
+            args=[self.purchase_request.pk],
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_cancel_request(self):
+
+        url = reverse(
+            "purchase_requests:request_cancel",
+            args=[self.purchase_request.pk],
+        )
+
+        old_count = Request.objects.count()
+
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 302)
+
+        self.purchase_request.refresh_from_db()
+
+        self.assertEqual(
+            self.purchase_request.status,
+            Request.Status.CANCELLED,
+        )
+        self.assertEqual(Request.objects.count(), old_count)
+
+        # Повторная отмена недоступна.
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_cancel_get_not_allowed(self):
+
+        url = reverse(
+            "purchase_requests:request_cancel",
+            args=[self.purchase_request.pk],
+        )
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 405)
+
+        self.purchase_request.refresh_from_db()
+
+        self.assertEqual(
+            self.purchase_request.status,
+            Request.Status.CREATED,
+        )
+
+    def test_invalid_filter(self):
+
+        url = reverse("purchase_requests:requests")
+
+        response = self.client.get(
+            url,
+            {"min_amount": "abc"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(
+            "min_amount",
+            response.context["form"].errors,
+        )
+
+    def test_image_upload(self):
+
+        with TemporaryDirectory() as media_dir:
+            with override_settings(MEDIA_ROOT=media_dir):
+                buffer = BytesIO()
+                image = Image.new("RGB", (10, 10), "white")
+                image.save(buffer, format="PNG")
+
+                uploaded_image = SimpleUploadedFile(
+                    "test.png",
+                    buffer.getvalue(),
+                    content_type="image/png",
+                )
+
+                data = {
+                    **self.valid_data,
+                    "image": uploaded_image,
+                }
+
+                url = reverse(
+                    "purchase_requests:request_create"
+                )
+
+                response = self.client.post(url, data)
+
+                self.assertEqual(response.status_code, 302)
+
+                created = Request.objects.latest("id")
+
+                self.assertTrue(created.image)
+                self.assertTrue(
+                    created.image.storage.exists(
+                        created.image.name
+                    )
+                )
+
+                detail = self.client.get(
+                    created.get_absolute_url()
+                )
+
+                self.assertEqual(detail.status_code, 200)
+                self.assertContains(
+                    detail,
+                    created.image.url,
+                )

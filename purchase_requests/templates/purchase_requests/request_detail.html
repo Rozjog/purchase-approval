@@ -40,6 +40,24 @@
                     <strong>Статус:</strong>
                     {{ purchase_request.status }}
                 </p>
+
+                <div class="mt-4">
+                    <h2 class="h5">Изображение заявки</h2>
+
+                    {% if purchase_request.image %}
+                        <img
+                            src="{{ purchase_request.image.url }}"
+                            alt="{{ purchase_request.name }}"
+                            class="img-fluid rounded"
+                            style="max-height: 350px; object-fit: contain;"
+                        >
+                    {% else %}
+                        <p class="text-muted">
+                            Изображение не загружено.
+                        </p>
+                    {% endif %}
+                </div>
+
             </div>
         </div>
     {% else %}

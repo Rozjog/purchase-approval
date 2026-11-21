@@ -99,7 +99,10 @@ def requests(request):
 
 def request_create(request):
     if request.method == "POST":
-        form = RequestForm(request.POST)
+        form = RequestForm(
+            request.POST,
+            request.FILES,
+        )
 
         if form.is_valid():
             form.save()
@@ -116,8 +119,7 @@ def request_create(request):
 
 
 def request_update(request, request_id):
-    # Редактируем только созданные заявки
-    # без существующих согласований.
+
     purchase_request = get_object_or_404(
         Request.objects.created().filter(
             approvals__isnull=True
@@ -126,22 +128,21 @@ def request_update(request, request_id):
     )
 
     if request.method == "POST":
-        # Связываем форму с существующей заявкой.
         form = RequestForm(
             request.POST,
             instance=purchase_request,
         )
 
         if form.is_valid():
-            # Обновляем запись, а не создаём новую.
             form.save()
 
             return redirect("purchase_requests:requests")
 
     else:
-        # Отображаем текущие значения заявки.
         form = RequestForm(
-            instance=purchase_request
+            request.POST,
+            request.FILES,
+            instance=purchase_request,
         )
 
     return render(
@@ -156,8 +157,7 @@ def request_update(request, request_id):
 
 @require_POST
 def request_cancel(request, request_id):
-    # Отменять можно только созданные заявки
-    # без согласований.
+
     purchase_request = get_object_or_404(
         Request.objects.created().filter(
             approvals__isnull=True
